@@ -3,6 +3,7 @@ Random Collection of ansible tasks for Windows and Linux.
 
 ## Windows
 1. read_event_logs
+```sh
 	ansible-playbook windows/read_event_logs.yml -i hosts --extra-vars='{"NumEvents":integer, 
 																		 "ProviderName":"string",
 																		 "ID":"CommmaSeperatedIntegers",
@@ -10,3 +11,4 @@ Random Collection of ansible tasks for Windows and Linux.
 																		 "StartTime":"WindowsDateFormat",
 																		 "EndTime":"WindowsDateFormat"
 																		}'
+```
