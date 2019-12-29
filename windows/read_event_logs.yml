@@ -1,0 +1,28 @@
+# Reads and Prints the events from Windows Application Event Log #
+# Usage: ansible-playbook windows/read_event_logs.yml -i hosts --extra-vars='{"NumEvents":10,...}' #
+---
+- hosts: all
+  gather_facts: no
+  vars:
+    default_event_path: 'C:\Windows\system32\winevt\logs\Application.evtx'
+
+  tasks:
+    - set_fact:
+        providerName: "{% if ProviderName is defined %} ProviderName='{{ ProviderName }}'; {% endif %}"
+        id: "{% if ID is defined %} ID='{{ ID }}'; {% endif %}"
+        level: "{% if Level is defined %} Level='{{ Level }}'; {% endif %}"
+        startTime: "{% if StartTime is defined %} StartTime='{{ StartTime }}'; {% endif %}"
+        endTime: "{% if EndTime is defined %} EndTime='{{ EndTime }}'; {% endif %}"
+        numEvents: "{{ NumEvents | default(100) }}"
+
+    - set_fact:
+        event_filters: "{{ providerName}}{{ id }}{{ level }}{{ startTime }}{{ endTime }}"
+    
+    - name: Read from Windows Event log file
+      win_shell: Get-WinEvent -MaxEvents {{ numEvents }} -FilterHashtable @{Path='{{ default_event_path }}';{{ event_filters }}} | Format-Table -Property TimeCreated, ProviderName, Message -Wrap
+      register: results
+      ignore_errors: yes
+
+    - debug: msg="{{ results.stdout_lines }}"
+    
+    - debug: msg="{{ results.stderr }}"
